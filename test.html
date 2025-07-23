@@ -1,70 +1,47 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <title>POST 測試表單（傳送至 Google Apps Script）</title>
 </head>
-<body style="font-family:sans-serif; padding:20px;">
+<body>
   <h2>POST 測試表單（傳送至 Google Apps Script）</h2>
-
-  <label>玩家編號 (player):<br>
-    <input type="text" id="player" value="test001"><br><br>
-  </label>
-
-  <label>Score:<br>
-    <input type="number" id="score" value="100"><br><br>
-  </label>
-
-  <label>Time:<br>
-    <input type="number" id="time" value="120"><br><br>
-  </label>
-
-  <label>遊戲代號 gameId:<br>
+  <p>玩家編號 (player):<br><input id="player" value="test001"></p>
+  <p>Score:<br><input id="score" value="100"></p>
+  <p>Time:<br><input id="time" value="120"></p>
+  <p>遊戲代號 gameId:<br>
     <select id="gameId">
       <option value="game1">Game 1</option>
       <option value="game2">Game 2</option>
-      <option value="game3">Game 3</option>
-      <option value="game4">Game 4</option>
-      <option value="game5">Game 5</option>
-      <option value="game6">Game 6</option>
-      <option value="game7">Game 7</option>
-    </select><br><br>
-  </label>
-
-  <button onclick="sendData()">送出測試資料</button>
-  <p id="result" style="margin-top: 20px; font-weight:bold;"></p>
+    </select>
+  </p>
+  <button onclick="submitData()">送出測試資料</button>
+  <p id="result" style="color:red;"></p>
 
   <script>
-    async function sendData() {
-      const url = "https://script.google.com/macros/s/AKfycbyVJqymz8Un7xUcGFLa-2IXEEtJLPAJBr6mBma7VwOPkr_32zUiHtlG4n1BNEIMMcGh/exec";
-      const data = {
-        player: document.getElementById("player").value,
-        score: document.getElementById("score").value,
-        time: document.getElementById("time").value,
-        gameId: document.getElementById("gameId").value
-      };
+    async function submitData() {
+      const player = document.getElementById("player").value;
+      const score = parseInt(document.getElementById("score").value, 10);
+      const time = parseInt(document.getElementById("time").value, 10);
+      const gameId = document.getElementById("gameId").value;
 
-      const resultEl = document.getElementById("result");
-      resultEl.innerHTML = "⏳ 傳送中...";
+      const url = "https://script.google.com/macros/s/AKfycbwqK2xgqnDtv4hW0evOelwCwxuK1ehRjQ2r6PYD2_Wi-rFe9K-OwkRYJ2PnjVkUeP9J/exec";
 
       try {
-        const res = await fetch(url, {
+        const response = await fetch(url, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ player, score, time, gameId })
         });
 
-        const text = await res.text();
-        if (res.ok) {
-          resultEl.style.color = "green";
-          resultEl.innerHTML = "✅ 傳送成功：" + text;
-        } else {
-          resultEl.style.color = "red";
-          resultEl.innerHTML = "❌ 發送失敗：" + text;
-        }
+        const text = await response.text();
+        document.getElementById("result").textContent = "✅ 成功：" + text;
       } catch (err) {
-        resultEl.style.color = "darkred";
-        resultEl.innerHTML = "❌ 發送失敗： " + err;
+        document.getElementById("result").textContent = "❌ 發送失敗：" + err;
+        console.error(err);
       }
     }
   </script>
